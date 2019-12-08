@@ -51,7 +51,7 @@ bool PerformUltraGrep(int argc, vector<string> argv, SocketServer &sockServ) {
 		}
 #ifdef _DEBUG
 		stringstream ss;
-		ss << endl << L"Verbose:" << (verboseOutput ? L"Enabled" : L"Disabled") << L"\ninitPath:" << initPath << L"\nuserQuery:" << userQuery << L"\nextList:" << extList << endl << endl;
+		ss << endl << "Verbose:" << (verboseOutput ? "Enabled" : "Disabled") << "\ninitPath:" << initPath << "\nuserQuery:" << userQuery << "\nextList:" << extList << endl << endl;
 		sockServ.SendToClient(ss.str());
 #endif
 

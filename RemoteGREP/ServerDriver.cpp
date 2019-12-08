@@ -45,8 +45,7 @@ int main(int argc, char* argv[]) {
 	string targetAddress = "127.0.0.1";
 	SocketServer tcpSocket;
 	bool waitingOnClients = true;	
-	string clientLastInput = "";
-	int socketReturnVal = 0;
+	string clientLastInput = "";	
 
 	try {
 		std::cout << "Project 3: Remote UltraGREP - TCP/IP Server (Matthew Wrobel 2019)" << endl;
@@ -75,51 +74,43 @@ int main(int argc, char* argv[]) {
 		}
 
 		
-		while (waitingOnClients) {			
-			socketReturnVal = 0;
+		while (waitingOnClients) {						
 			if (tcpSocket.IsClientConnected()) {				
 				//Grab socket content and parse accordingly		
-				tcpSocket.ReceiveFromClient(clientLastInput);
-				switch (tcpSocket.GetWSAResultValue()) {
+				switch (tcpSocket.ReceiveFromClient(clientLastInput)) {
 				case SocketServer::SocketSendStatus::NoSocket:
-					cerr << "NoSocket" << socketReturnVal << endl;
+					tcpSocket.SeverClientConnection();
 					break;
 				case SocketServer::SocketSendStatus::SocketError:
-					if (socketReturnVal == WSAECONNRESET) {
-						tcpSocket.SeverClientConnection();
-						std::cout << "Connection to the client has been dropped." << endl;
-					}
+					if (tcpSocket.GetWSAResultValue() == WSAECONNRESET) {
+						tcpSocket.SeverClientConnection();						
+					}				
 					break;
 				default:
 					if (clientLastInput != "") {
 						std::cout << "[REMOTE]->" << clientLastInput << endl;
 					}
 					if (strcmp(clientLastInput.c_str(), "drop") == 0) {
-						tcpSocket.SeverClientConnection();
-						std::cout << "Connection to the client has been dropped." << endl;
+						tcpSocket.SeverClientConnection();						
 					}
 					else if (strcmp(clientLastInput.substr(0, 10).c_str(), "stopserver") == 0) {
 						tcpSocket.SendToClient("Server instance is being terminated.");
-						tcpSocket.CloseTCPSocket();
-						std::cout << "Server instance has been terminated." << endl;
+						tcpSocket.CloseTCPSocket();						
 						return EXIT_SUCCESS;
 					}
 					else if (strcmp(clientLastInput.substr(0, 4).c_str(), "grep") == 0) {
-						tcpSocket.SendToClient("starting the Greb");
+						tcpSocket.SendToClient("Initializing Remote UltraGREP instance...");
 
 						vector<string> argList = ParseArguments(clientLastInput);
 
-						
 						PerformUltraGrep((int)argList.size(), argList, tcpSocket);
 						tcpSocket.SendToClient("finishgrep");
 					}
 					break;
 				}								
 			}
-			else {
-				std::cout << "Awaiting remote connection to TCP/IP Socket..." << endl;
+			else {				
 				tcpSocket.WaitForTCPClientConnection();
-				std::cout << "Remote connection established." << endl;
 			}
 		}
 	}
