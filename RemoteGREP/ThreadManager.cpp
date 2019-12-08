@@ -160,25 +160,26 @@ void ThreadManager::ProcessTask() {
 							taskResultList.push_back(GrepFileInfo(taskFilePath.string(), occSet));
 						}
 					}
-					else if (filesystem::is_directory(taskFilePath)) {
-						//Scan the directory
-						for (filesystem::directory_entry currPath : filesystem::directory_iterator(taskFilePath)) {
-							if (verbose) {
-								{
-									lock_guard<mutex> outLock(outputMutex);
-									stringstream ss;
+				}
+				else if (filesystem::is_directory(taskFilePath)) {
+					//Scan the directory
+					for (filesystem::directory_entry currPath : filesystem::directory_iterator(taskFilePath)) {
+						if (verbose) {
+							{
+								lock_guard<mutex> outLock(outputMutex);
+								stringstream ss;
 #ifdef _DEBUG
-									ss << "[" << this_thread::get_id() << "]\t";
+								ss << "[" << this_thread::get_id() << "]\t";
 #endif
-									ss << "Scanning: " << taskFilePath << endl;
-									socketRef.SendToClient(ss.str());
-								}
+								ss << "Scanning: " << taskFilePath << endl;
+								socketRef.SendToClient(ss.str());
 							}
-							AddTask(currPath.path().string());
-							NotifyThreadPool();
 						}
+						AddTask(currPath.path().string());
+						NotifyThreadPool();
 					}
 				}
+				//}
 			}
 		}
 	}
