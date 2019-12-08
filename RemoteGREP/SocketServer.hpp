@@ -28,16 +28,18 @@ private:
 	SOCKET hConnectionToClient;	
 
 	char recvBuffer[DEFAULT_BUFFER_LENGTH];
+	int wsaResultVal;
 public:		
 	SocketServer();
 	~SocketServer();
 	
 	SocketServer::SocketBindStatus BindTCPSocket(const char[]);
 	void WaitForTCPClientConnection();
-	SocketServer::SocketSendStatus ReceiveFromClient(std::string &, int &);
-	SocketServer::SocketSendStatus SendToClient(std::string, int &);
+	SocketServer::SocketSendStatus ReceiveFromClient(std::string &);
+	SocketServer::SocketSendStatus SendToClient(std::string);
 	void CloseTCPSocket();
 	void SeverClientConnection();
 	bool IsClientConnected();
+	int GetWSAResultValue();
 	
 };

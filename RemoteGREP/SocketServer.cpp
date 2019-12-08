@@ -11,7 +11,7 @@ Brief: Implementation of SocketServer class header
 using namespace std;
 
 SocketServer::SocketServer() : wsaData({}), serverAddress({ 0 }),
-hTCPSocket(INVALID_SOCKET), hConnectionToClient(INVALID_SOCKET),recvBuffer("") {}
+hTCPSocket(INVALID_SOCKET), hConnectionToClient(INVALID_SOCKET),recvBuffer(""), wsaResultVal(0) {}
 
 SocketServer::~SocketServer() {
 	SocketServer::CloseTCPSocket();
@@ -49,41 +49,41 @@ void SocketServer::WaitForTCPClientConnection() {
 	}
 }
 
-SocketServer::SocketSendStatus SocketServer::ReceiveFromClient(string& returnVal, int& wsaVal) {
+SocketServer::SocketSendStatus SocketServer::ReceiveFromClient(string& returnVal) {
 	if (hConnectionToClient != INVALID_SOCKET) {
 		memset(recvBuffer, 0, sizeof(recvBuffer));
 		int bytesReceived = recv(hConnectionToClient, recvBuffer, DEFAULT_BUFFER_LENGTH, 0);
 		if (bytesReceived == SOCKET_ERROR) {
 			returnVal = WSAGetLastError() + "";
-			wsaVal = WSAGetLastError();
+			wsaResultVal = WSAGetLastError();
 			return SocketServer::SocketSendStatus::SocketError;
 		}
 		else {
 			string clientResults = recvBuffer;
 			int recSize = stoi(clientResults.substr(0, clientResults.find('|')));			
 			returnVal = clientResults.substr(clientResults.find('|') + 1, recSize);
-			wsaVal = WSAGetLastError();
+			wsaResultVal = WSAGetLastError();
 			return SocketServer::SocketSendStatus::Success;			
 		}
 	}
 	returnVal = WSAGetLastError() + "";
-	wsaVal = WSAGetLastError();
+	wsaResultVal = WSAGetLastError();
 	return SocketServer::SocketSendStatus::NoSocket;
 }
 
-SocketServer::SocketSendStatus SocketServer::SendToClient(string content, int& wsaVal) {
+SocketServer::SocketSendStatus SocketServer::SendToClient(string content) {
 	if (hConnectionToClient != INVALID_SOCKET) {
 		stringstream formattedContent;
 		formattedContent << (int)strlen(content.c_str()) << "|" << content.c_str();	//Prepend content size for receiving
 		int bytesSent = send(hConnectionToClient, formattedContent.str().c_str(), (int)strlen(formattedContent.str().c_str()), 0);
 		if (bytesSent == SOCKET_ERROR) {
-			wsaVal = WSAGetLastError();
+			wsaResultVal = WSAGetLastError();
 			return SocketServer::SocketSendStatus::SocketError;
 		}
-		wsaVal = WSAGetLastError();
+		wsaResultVal = WSAGetLastError();
 		return SocketServer::SocketSendStatus::Success;
 	}	
-	wsaVal = WSAGetLastError();
+	wsaResultVal = WSAGetLastError();
 	return SocketServer::SocketSendStatus::NoSocket;
 }
 
@@ -109,6 +109,9 @@ bool SocketServer::IsClientConnected() {
 	return true;
 }
 
+int SocketServer::GetWSAResultValue() {
+	return wsaResultVal;
+}
 
 
 
