@@ -27,7 +27,7 @@ SocketClient::SocketConnectStatus SocketClient::AttemptForTCPSocketConnection(co
 	hTCPSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 	
 	//Set the socket timeout value for receiving data
-	/*DWORD iOptVal = 1;
+	/*DWORD iOptVal = 100;
 	if (setsockopt(hTCPSocket, SOL_SOCKET, SO_RCVTIMEO, (char*)& iOptVal, sizeof(iOptVal)) == SOCKET_ERROR) {
 		cerr << "SocketClient::AttemptForTCPSocketConnection() Socket Option Error: " << WSAGetLastError() << endl;
 	}*/
@@ -67,11 +67,12 @@ SocketClient::SocketSendStatus SocketClient::ReceiveFromSocket(string &returnVal
 			stringstream formattedResults;
 			string clientResults = recvBuffer;
 			if (clientResults.length() > 0) {
-				int recSize = stoi(clientResults.substr(0, clientResults.find('|')));
-				formattedResults << clientResults.substr(clientResults.find('|') + 1, recSize);
-				clientResults = clientResults.substr(clientResults.find('|') + 1 + recSize);
+				//int recSize = stoi(clientResults.substr(0, clientResults.find('|')));
+				//formattedResults << clientResults.substr(clientResults.find('|') + 1, recSize);
+				//clientResults = clientResults.substr(clientResults.find('|') + 1 + recSize);
+				//formattedResults << clientResults.substr(0, bytesReceived);
 			}			
-			returnVal = formattedResults.str();
+			returnVal = clientResults.substr(0, bytesReceived);//formattedResults.str();
 			wsaResultVal = WSAGetLastError();
 			return SocketClient::SocketSendStatus::Success;			
 		}
@@ -83,9 +84,10 @@ SocketClient::SocketSendStatus SocketClient::ReceiveFromSocket(string &returnVal
 
 SocketClient::SocketSendStatus SocketClient::SendToSocket(string content) {
 	if (hTCPSocket != INVALID_SOCKET) {
-		stringstream formattedContent;
-		formattedContent << (int)strlen(content.c_str()) << "|" << content.c_str();	//Prepend content size for receiving
-		int bytesSent = send(hTCPSocket, formattedContent.str().c_str(), (int)strlen(formattedContent.str().c_str()), 0);
+		//stringstream formattedContent;
+		//formattedContent << (int)strlen(content.c_str()) << "|" << content.c_str();	//Prepend content size for receiving
+		//int bytesSent = send(hTCPSocket, formattedContent.str().c_str(), (int)strlen(formattedContent.str().c_str()), 0);
+		int bytesSent = send(hTCPSocket, content.c_str(), (int)strlen(content.c_str()), 0);
 		if (bytesSent == SOCKET_ERROR) {			
 			cerr << "SendToSocket() error: " << WSAGetLastError() << endl;			
 			return SocketClient::SocketSendStatus::SocketError;
