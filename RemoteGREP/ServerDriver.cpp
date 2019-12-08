@@ -11,6 +11,12 @@ Brief: Driver class for execution of remote server instance of UltraGREP Applica
 #include <vector>
 #include <string>
 
+// check for memory leaks
+// Setup DBG environment
+#define _CRTDBG_MAP_ALLOC
+#include <stdlib.h>
+#include <crtdbg.h>
+
 using namespace std;
 
 vector<string> ParseArguments(string initialFeed) {
@@ -48,7 +54,7 @@ int main(int argc, char* argv[]) {
 	string clientLastInput = "";	
 
 	try {
-		std::cout << "Project 3: Remote UltraGREP - TCP/IP Server (Matthew Wrobel 2019)" << endl;
+		std::cout << "Project 3: Remote UltraGREP - TCP/IP Server (Matthew Wrobel and Daniel Schramm 2019)" << endl;
 		
 		//Process parameters
 		if (argc > 2 || argc < 1) {
@@ -118,5 +124,13 @@ int main(int argc, char* argv[]) {
 		cerr << ex.what() << endl;
 		return EXIT_FAILURE;
 	}
+#ifdef _DEBUG
+	// Enable CRT memory leak checking.
+	int dbgFlags = _CrtSetDbgFlag(_CRTDBG_REPORT_FLAG);
+	dbgFlags |= _CRTDBG_CHECK_ALWAYS_DF;
+	dbgFlags |= _CRTDBG_DELAY_FREE_MEM_DF;
+	dbgFlags |= _CRTDBG_LEAK_CHECK_DF;
+	_CrtSetDbgFlag(dbgFlags);
+#endif
 	return EXIT_SUCCESS;
 }
