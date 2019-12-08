@@ -13,7 +13,7 @@ Brief:	Implementation of UltraGrep driver method
 
 using namespace std;
 
-bool PerformUltraGrep(int argc, vector<string> argv, SocketServer sockServ) {
+bool PerformUltraGrep(int argc, vector<string> argv, SocketServer &sockServ) {
 	bool verboseOutput = false;
 	string initPath = filesystem::current_path().string();
 	string userQuery;
@@ -51,7 +51,7 @@ bool PerformUltraGrep(int argc, vector<string> argv, SocketServer sockServ) {
 		}
 #ifdef _DEBUG
 		stringstream ss;
-		ss << endl << L"Verbose:" << (verboseOutput ? L"Enabled" : L"Disabled") << L"\ninitPath:" << initPath << L"\nuserQuery:" << userQuery << L"\nextList:" << extList << endl << endl;
+		ss << endl << "Verbose:" << (verboseOutput ? "Enabled" : "Disabled") << "\ninitPath:" << initPath << "\nuserQuery:" << userQuery << "\nextList:" << extList << endl << endl;
 		sockServ.SendToClient(ss.str());
 #endif
 
@@ -99,6 +99,13 @@ bool PerformUltraGrep(int argc, vector<string> argv, SocketServer sockServ) {
 	catch (exception ex) {
 		stringstream ss;
 		ss << "PerformUltraGrep() failed: " << ex.what() << endl;
+		sockServ.SendToClient(ss.str());
+		cerr << "PerformUltraGrep() failed: "<< ex.what() << endl;
+		return false;
+	}
+	catch (...) {
+		stringstream ss;
+		ss << "PerformUltraGrep() failed" << endl;
 		sockServ.SendToClient(ss.str());
 		return false;
 	}

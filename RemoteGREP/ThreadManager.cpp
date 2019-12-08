@@ -16,7 +16,7 @@ Brief:	Implementation of ThreadManager class Header
 
 using namespace std;
 
-ThreadManager::ThreadManager(unsigned numThreads, const string& uQuery, const string& eList, bool verb, SocketServer& sockServ) : userQuery(uQuery), socketRef(sockServ) {
+ThreadManager::ThreadManager(unsigned numThreads, const string& uQuery, const string& eList, bool verb, SocketServer &sockServ) : userQuery(uQuery), socketRef(sockServ) {
 	verbose = verb;
 	nThreads = numThreads;
 	barrierThreshold = nThreads + 1;
@@ -156,6 +156,7 @@ void ThreadManager::ProcessTask() {
 								ss << "Match found in: " << taskFilePath << endl;
 								socketRef.SendToClient(ss.str());
 							}
+
 							taskResultList.push_back(GrepFileInfo(taskFilePath.string(), occSet));
 						}
 					}

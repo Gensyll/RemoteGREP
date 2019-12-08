@@ -47,8 +47,7 @@ int main(int argc, char* argv[]) {
 		//User input loop
 		string userInput;
 		while (waitingForInput) {	
-			socketLastOutput.clear();
-			socketReturnVal = 0;
+			socketLastOutput.clear();			
 			userInput.clear();
 			cout << "->";
 			getline(std::cin, userInput);
@@ -85,7 +84,7 @@ int main(int argc, char* argv[]) {
 						if (tcpSocket.IsConnected()) {
 							tcpSocket.SendToSocket("drop");
 							tcpSocket.CloseTCPSocket();
-							cout << "TCP/IP Socket connection has been dropped." << endl;
+							//cout << "TCP/IP Socket connection has been dropped." << endl;
 						}
 						else {
 							cout << "No existing TCP/IP Socket connection to drop." << endl;
@@ -95,7 +94,7 @@ int main(int argc, char* argv[]) {
 						if (tcpSocket.IsConnected()) {							
 							tcpSocket.SendToSocket("stopserver");
 							tcpSocket.CloseTCPSocket();
-							cout << "TCP/IP Socket connection has been dropped." << endl;
+							//cout << "TCP/IP Socket connection has been dropped." << endl;
 						}
 						else {
 							cout << "No existing TCP/IP Socket host connection to stop." << endl;
@@ -103,16 +102,22 @@ int main(int argc, char* argv[]) {
 					}
 					else if (strcmp(userInput.substr(0, 4).c_str(), "grep") == 0) {						
 						tcpSocket.SendToSocket(userInput.c_str());
-						while (strcmp(socketLastOutput.c_str(), "finishgrep") != 0) {
-							switch (tcpSocket.ReceiveFromSocket(socketLastOutput, socketReturnVal)) {
+ 						while (strcmp(socketLastOutput.c_str(), "finishgrep") != 0) {
+							switch (tcpSocket.ReceiveFromSocket(socketLastOutput)) {
 							case SocketClient::SocketSendStatus::NoSocket:
-								cerr << "NoSocket Error " << socketReturnVal << endl;
+								tcpSocket.CloseTCPSocket();
 								break;
 							case SocketClient::SocketSendStatus::SocketError:								
 								cerr << "WSAError " << socketReturnVal << endl;
+								tcpSocket.CloseTCPSocket();
 								break;
 							default:
-								cout << socketLastOutput << endl;
+								if (socketLastOutput != "") {
+									if (strcmp(socketLastOutput.c_str(), "finishgrep") == 0)
+										cout << "Grep command complete." << endl;
+									else
+										cout << socketLastOutput << endl;
+								}
 								break;
 							}
 						}

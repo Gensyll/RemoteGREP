@@ -15,11 +15,11 @@ Brief: Header declaration for client-side socket class facade
 
 unsigned short constexpr RECVPORT = 49153;
 //unsigned short constexpr SENDPORT = 49154;
-unsigned short constexpr DEFAULT_BUFFER_LENGTH = 1024;
+unsigned short constexpr DEFAULT_BUFFER_LENGTH = 2048;//1024;
 
 class SocketClient {
 public:
-	enum SocketConnectStatus { Connected, WSAStartupFailed, ConnectFailed };
+	enum SocketConnectStatus { Connected, WSAStartupFailed, ConnectFailed, ConfigFailed };
 	enum SocketSendStatus { Success, SocketError, NoSocket };
 private:
 	WSAData wsaData;
@@ -27,14 +27,16 @@ private:
 	sockaddr_in serverAddress;	
 
 	char recvBuffer[DEFAULT_BUFFER_LENGTH];
+	int wsaResultVal;
 public:
 	SocketClient();
 	~SocketClient();
 
 	SocketClient::SocketConnectStatus AttemptForTCPSocketConnection(const char[]);
-	SocketClient::SocketSendStatus ReceiveFromSocket(std::string &, int &);
+	SocketClient::SocketSendStatus ReceiveFromSocket(std::string &);
 	SocketClient::SocketSendStatus SendToSocket(std::string);
 	void CloseTCPSocket();
 	bool IsConnected();
+	int GetWSAResultValue();
 
 };

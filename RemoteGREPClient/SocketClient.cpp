@@ -11,7 +11,7 @@ Brief: Implementation of SocketClient class header
 using namespace std;
 
 SocketClient::SocketClient() : wsaData({}), serverAddress({ 0 }),
-hTCPSocket(INVALID_SOCKET), recvBuffer("") {}
+hTCPSocket(INVALID_SOCKET), recvBuffer(""), wsaResultVal(0) {}
 
 SocketClient::~SocketClient() {
 	SocketClient::CloseTCPSocket();
@@ -49,14 +49,19 @@ SocketClient::SocketConnectStatus SocketClient::AttemptForTCPSocketConnection(co
 	return SocketClient::SocketConnectStatus::Connected;
 }
 
-SocketClient::SocketSendStatus SocketClient::ReceiveFromSocket(string &returnVal, int &wsaVal) {
+SocketClient::SocketSendStatus SocketClient::ReceiveFromSocket(string &returnVal) {
 	if (hTCPSocket != INVALID_SOCKET) {
 		memset(recvBuffer, 0, sizeof(recvBuffer));
 		int bytesReceived = recv(hTCPSocket, recvBuffer, DEFAULT_BUFFER_LENGTH, 0);
 		if (bytesReceived == SOCKET_ERROR) {
 			returnVal = WSAGetLastError() + "";
-			wsaVal = WSAGetLastError();
+			wsaResultVal = WSAGetLastError();
 			return SocketClient::SocketSendStatus::SocketError;
+		}
+		else if (bytesReceived == INVALID_SOCKET) {
+			returnVal = WSAGetLastError() + "";
+			wsaResultVal = WSAGetLastError();
+			return SocketClient::SocketSendStatus::NoSocket;
 		}
 		else {
 			stringstream formattedResults;
@@ -67,11 +72,12 @@ SocketClient::SocketSendStatus SocketClient::ReceiveFromSocket(string &returnVal
 				clientResults = clientResults.substr(clientResults.find('|') + 1 + recSize);
 			}			
 			returnVal = formattedResults.str();
-			wsaVal = WSAGetLastError();
+			wsaResultVal = WSAGetLastError();
 			return SocketClient::SocketSendStatus::Success;			
 		}
 	}	
 	returnVal = WSAGetLastError() + "";	
+	wsaResultVal = WSAGetLastError();
 	return SocketClient::SocketSendStatus::NoSocket;	
 }
 
@@ -84,6 +90,9 @@ SocketClient::SocketSendStatus SocketClient::SendToSocket(string content) {
 			cerr << "SendToSocket() error: " << WSAGetLastError() << endl;			
 			return SocketClient::SocketSendStatus::SocketError;
 		}
+		else if (bytesSent == INVALID_SOCKET) {
+			return SocketClient::SocketSendStatus::NoSocket;
+		}
 		return SocketClient::SocketSendStatus::Success;
 	}
 	return SocketClient::SocketSendStatus::NoSocket;
@@ -95,6 +104,7 @@ void SocketClient::CloseTCPSocket() {
 		closesocket(hTCPSocket);
 		hTCPSocket = INVALID_SOCKET;
 		WSACleanup();
+		std::cout << "Socket instance has been terminated." << endl;
 	}		
 }
 
@@ -102,4 +112,8 @@ bool SocketClient::IsConnected() {
 	if (hTCPSocket == INVALID_SOCKET)
 		return false;
 	return true;
+}
+
+int SocketClient::GetWSAResultValue() {
+	return wsaResultVal;
 }

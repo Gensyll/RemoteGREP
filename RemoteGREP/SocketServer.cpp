@@ -44,9 +44,12 @@ SocketServer::SocketBindStatus SocketServer::BindTCPSocket(const char targetAddr
 }
 
 void SocketServer::WaitForTCPClientConnection() {
+	std::cout << "Awaiting remote connection to TCP/IP Socket..." << endl;
 	while (hConnectionToClient == INVALID_SOCKET) {
 		hConnectionToClient = accept(hTCPSocket, NULL, NULL);
 	}
+	if(hConnectionToClient != INVALID_SOCKET)
+		std::cout << "Remote connection established." << endl;
 }
 
 SocketServer::SocketSendStatus SocketServer::ReceiveFromClient(string& returnVal) {
@@ -57,6 +60,11 @@ SocketServer::SocketSendStatus SocketServer::ReceiveFromClient(string& returnVal
 			returnVal = WSAGetLastError() + "";
 			wsaResultVal = WSAGetLastError();
 			return SocketServer::SocketSendStatus::SocketError;
+		}
+		else if (bytesReceived == INVALID_SOCKET) {
+			returnVal = WSAGetLastError() + "";
+			wsaResultVal = WSAGetLastError();
+			return SocketServer::SocketSendStatus::NoSocket;
 		}
 		else {
 			string clientResults = recvBuffer;
@@ -80,6 +88,9 @@ SocketServer::SocketSendStatus SocketServer::SendToClient(string content) {
 			wsaResultVal = WSAGetLastError();
 			return SocketServer::SocketSendStatus::SocketError;
 		}
+		else if (bytesSent == INVALID_SOCKET) {
+			return SocketServer::SocketSendStatus::NoSocket;
+		}
 		wsaResultVal = WSAGetLastError();
 		return SocketServer::SocketSendStatus::Success;
 	}	
@@ -93,6 +104,7 @@ void SocketServer::CloseTCPSocket() {
 		closesocket(hTCPSocket);
 		hTCPSocket = INVALID_SOCKET;
 		WSACleanup();
+		std::cout << "Socket instance has been terminated." << endl;
 	}	
 }
 
@@ -100,6 +112,7 @@ void SocketServer::SeverClientConnection() {
 	if (hConnectionToClient != INVALID_SOCKET) {
 		closesocket(hConnectionToClient);
 		hConnectionToClient = INVALID_SOCKET;
+		std::cout << "Connection to the client has been dropped." << endl;
 	}
 }
 
