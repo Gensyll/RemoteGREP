@@ -112,7 +112,9 @@ int main(int argc, char* argv[]) {
 								cerr << "WSAError " << socketReturnVal << endl;
 								break;
 							default:
-								cout << socketLastOutput << endl;
+								if (socketLastOutput != "") {
+									cout << socketLastOutput << endl;
+								}
 								break;
 							}
 						}

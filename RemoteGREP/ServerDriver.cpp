@@ -91,7 +91,9 @@ int main(int argc, char* argv[]) {
 					}
 					break;
 				default:
-					std::cout << "[REMOTE]->" << clientLastInput << endl;
+					if (clientLastInput != "") {
+						std::cout << "[REMOTE]->" << clientLastInput << endl;
+					}
 					if (strcmp(clientLastInput.c_str(), "drop") == 0) {
 						tcpSocket.SeverClientConnection();
 						std::cout << "Connection to the client has been dropped." << endl;
@@ -103,7 +105,10 @@ int main(int argc, char* argv[]) {
 						return EXIT_SUCCESS;
 					}
 					else if (strcmp(clientLastInput.substr(0, 4).c_str(), "grep") == 0) {
+						tcpSocket.SendToClient("starting the Greb");
+
 						vector<string> argList = ParseArguments(clientLastInput);
+
 						
 						PerformUltraGrep((int)argList.size(), argList, tcpSocket);
 						tcpSocket.SendToClient("finishgrep");

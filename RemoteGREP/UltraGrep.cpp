@@ -13,7 +13,7 @@ Brief:	Implementation of UltraGrep driver method
 
 using namespace std;
 
-bool PerformUltraGrep(int argc, vector<string> argv, SocketServer sockServ) {
+bool PerformUltraGrep(int argc, vector<string> argv, SocketServer &sockServ) {
 	bool verboseOutput = false;
 	string initPath = filesystem::current_path().string();
 	string userQuery;
@@ -99,6 +99,13 @@ bool PerformUltraGrep(int argc, vector<string> argv, SocketServer sockServ) {
 	catch (exception ex) {
 		stringstream ss;
 		ss << "PerformUltraGrep() failed: " << ex.what() << endl;
+		sockServ.SendToClient(ss.str());
+		cerr << "PerformUltraGrep() failed: "<< ex.what() << endl;
+		return false;
+	}
+	catch (...) {
+		stringstream ss;
+		ss << "PerformUltraGrep() failed" << endl;
 		sockServ.SendToClient(ss.str());
 		return false;
 	}

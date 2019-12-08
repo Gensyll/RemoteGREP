@@ -24,4 +24,4 @@ struct GrepFileInfo {
 	};
 };
 
-bool PerformUltraGrep(int argc, std::vector<std::string> argv, SocketServer sockServ);
+bool PerformUltraGrep(int argc, std::vector<std::string> argv, SocketServer &sockServ);
