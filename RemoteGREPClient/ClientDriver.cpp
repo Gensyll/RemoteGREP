@@ -47,6 +47,7 @@ int main(int argc, char* argv[]) {
 		//User input loop
 		string userInput;
 		while (waitingForInput) {	
+			socketLastOutput.clear();
 			socketReturnVal = 0;
 			userInput.clear();
 			cout << "->";
@@ -100,7 +101,7 @@ int main(int argc, char* argv[]) {
 							cout << "No existing TCP/IP Socket host connection to stop." << endl;
 						}
 					}
-					else if (strcmp(userInput.substr(0, 4).c_str(), "grep") == 0) {
+					else if (strcmp(userInput.substr(0, 4).c_str(), "grep") == 0) {						
 						tcpSocket.SendToSocket(userInput.c_str());
 						while (strcmp(socketLastOutput.c_str(), "finishgrep") != 0) {
 							switch (tcpSocket.ReceiveFromSocket(socketLastOutput, socketReturnVal)) {

@@ -61,9 +61,9 @@ SocketClient::SocketSendStatus SocketClient::ReceiveFromSocket(string &returnVal
 		else {
 			stringstream formattedResults;
 			string clientResults = recvBuffer;
-			while (clientResults.length() > 0) {
+			if (clientResults.length() > 0) {
 				int recSize = stoi(clientResults.substr(0, clientResults.find('|')));
-				formattedResults << clientResults.substr(clientResults.find('|') + 1, recSize) << endl;
+				formattedResults << clientResults.substr(clientResults.find('|') + 1, recSize);
 				clientResults = clientResults.substr(clientResults.find('|') + 1 + recSize);
 			}			
 			returnVal = formattedResults.str();

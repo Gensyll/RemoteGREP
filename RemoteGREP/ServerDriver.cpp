@@ -74,6 +74,7 @@ int main(int argc, char* argv[]) {
 						std::cout << "GREP to be implemented" << endl;
 						for (int i = 0; i < 10; ++i) {							
 							tcpSocket.SendToClient("hello gamer", socketReturnVal);							
+							cout << "tcpSocketStatus: " << socketReturnVal << endl;
 						}						
 						tcpSocket.SendToClient("finishgrep", socketReturnVal);
 					}
