@@ -6,9 +6,40 @@ Brief: Driver class for execution of remote server instance of UltraGREP Applica
 */
 
 #include "SocketServer.hpp"
+#include "UltraGrep.hpp"
 #include <iostream>
+#include <vector>
+#include <string>
 
 using namespace std;
+
+vector<string> ParseArguments(string initialFeed) {
+	string currArg;
+	vector<string> resultArgs, argString;
+	for (unsigned i = 0; i < initialFeed.length(); ++i) {
+		char c = initialFeed[i];
+		if (c == ' ') {
+			argString.push_back(currArg);
+			currArg.clear();
+		}
+		else if (c == '\"') {
+			++i;
+			while (initialFeed[i] != '\"') { currArg.push_back(initialFeed[i]); ++i; }
+			argString.push_back(currArg);
+			currArg.clear();
+		}
+		else {
+			currArg.push_back(c);
+		}
+	}
+	argString.push_back(currArg);
+	for (auto arg : argString) {
+		if (strcmp(arg.c_str(), "") != 0) {
+			resultArgs.push_back(arg);
+		}		
+	}
+	return resultArgs;
+}
 
 int main(int argc, char* argv[]) {
 	string targetAddress = "127.0.0.1";
@@ -47,8 +78,9 @@ int main(int argc, char* argv[]) {
 		while (waitingOnClients) {			
 			socketReturnVal = 0;
 			if (tcpSocket.IsClientConnected()) {				
-				//Grab socket content and parse accordingly					
-				switch (tcpSocket.ReceiveFromClient(clientLastInput, socketReturnVal)) {
+				//Grab socket content and parse accordingly		
+				tcpSocket.ReceiveFromClient(clientLastInput);
+				switch (tcpSocket.GetWSAResultValue()) {
 				case SocketServer::SocketSendStatus::NoSocket:
 					cerr << "NoSocket" << socketReturnVal << endl;
 					break;
@@ -65,18 +97,16 @@ int main(int argc, char* argv[]) {
 						std::cout << "Connection to the client has been dropped." << endl;
 					}
 					else if (strcmp(clientLastInput.substr(0, 10).c_str(), "stopserver") == 0) {
-						tcpSocket.SendToClient("Server instance is being terminated.", socketReturnVal);
+						tcpSocket.SendToClient("Server instance is being terminated.");
 						tcpSocket.CloseTCPSocket();
 						std::cout << "Server instance has been terminated." << endl;
 						return EXIT_SUCCESS;
 					}
 					else if (strcmp(clientLastInput.substr(0, 4).c_str(), "grep") == 0) {
-						std::cout << "GREP to be implemented" << endl;
-						for (int i = 0; i < 10; ++i) {							
-							tcpSocket.SendToClient("hello gamer", socketReturnVal);							
-							cout << "tcpSocketStatus: " << socketReturnVal << endl;
-						}						
-						tcpSocket.SendToClient("finishgrep", socketReturnVal);
+						vector<string> argList = ParseArguments(clientLastInput);
+						
+						PerformUltraGrep((int)argList.size(), argList, tcpSocket);
+						tcpSocket.SendToClient("finishgrep");
 					}
 					break;
 				}								
