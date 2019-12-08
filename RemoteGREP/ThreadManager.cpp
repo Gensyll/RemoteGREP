@@ -155,10 +155,9 @@ void ThreadManager::ProcessTask() {
 #endif
 								ss << "Match found in: " << taskFilePath << endl;
 								socketRef.SendToClient(ss.str());
-							}
-
-							taskResultList.push_back(GrepFileInfo(taskFilePath.string(), occSet));
+							}							
 						}
+						taskResultList.push_back(GrepFileInfo(taskFilePath.string(), occSet));
 					}
 				}
 				else if (filesystem::is_directory(taskFilePath)) {

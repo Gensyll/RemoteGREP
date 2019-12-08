@@ -15,7 +15,7 @@ Brief: Header declaration for client-side socket class facade
 
 unsigned short constexpr RECVPORT = 49153;
 //unsigned short constexpr SENDPORT = 49154;
-unsigned short constexpr DEFAULT_BUFFER_LENGTH = 2048;//1024;
+unsigned short constexpr DEFAULT_BUFFER_LENGTH = 16384;
 
 class SocketClient {
 public:

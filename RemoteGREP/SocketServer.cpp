@@ -24,6 +24,12 @@ SocketServer::SocketBindStatus SocketServer::BindTCPSocket(const char targetAddr
 	}		
 	hTCPSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 
+	//Set the socket timeout value for receiving data
+	DWORD iOptVal = 100;
+	if (setsockopt(hConnectionToClient, SOL_SOCKET, SO_RCVTIMEO, (char*)& iOptVal, sizeof(iOptVal)) == SOCKET_ERROR) {
+		cerr << "SocketClient::AttemptForTCPSocketConnection() Socket Option Error: " << WSAGetLastError() << endl;
+	}
+
 	//Create Server address and bind to socket
 	serverAddress.sin_family = AF_INET;
 	serverAddress.sin_port = htons(RECVPORT);
@@ -68,8 +74,8 @@ SocketServer::SocketSendStatus SocketServer::ReceiveFromClient(string& returnVal
 		}
 		else {
 			string clientResults = recvBuffer;
-			int recSize = stoi(clientResults.substr(0, clientResults.find('|')));			
-			returnVal = clientResults.substr(clientResults.find('|') + 1, recSize);
+			//int recSize = stoi(clientResults.substr(0, clientResults.find('|')));			
+			returnVal = clientResults.substr(0, bytesReceived);
 			wsaResultVal = WSAGetLastError();
 			return SocketServer::SocketSendStatus::Success;			
 		}
@@ -81,9 +87,10 @@ SocketServer::SocketSendStatus SocketServer::ReceiveFromClient(string& returnVal
 
 SocketServer::SocketSendStatus SocketServer::SendToClient(string content) {
 	if (hConnectionToClient != INVALID_SOCKET) {
-		stringstream formattedContent;
-		formattedContent << (int)strlen(content.c_str()) << "|" << content.c_str();	//Prepend content size for receiving
-		int bytesSent = send(hConnectionToClient, formattedContent.str().c_str(), (int)strlen(formattedContent.str().c_str()), 0);
+		//stringstream formattedContent;
+		//formattedContent << (int)strlen(content.c_str()) << "|" << content.c_str();	//Prepend content size for receiving
+		//int bytesSent = send(hConnectionToClient, formattedContent.str().c_str(), (int)strlen(formattedContent.str().c_str()), 0);
+		int bytesSent = send(hConnectionToClient, content.c_str(), (int)strlen(content.c_str()), 0);
 		if (bytesSent == SOCKET_ERROR) {
 			wsaResultVal = WSAGetLastError();
 			return SocketServer::SocketSendStatus::SocketError;

@@ -110,6 +110,7 @@ int main(int argc, char* argv[]) {
 							case SocketClient::SocketSendStatus::SocketError:								
 								cerr << "WSAError " << socketReturnVal << endl;
 								tcpSocket.CloseTCPSocket();
+								socketLastOutput = "finishgrep";
 								break;
 							default:
 								if (socketLastOutput != "") {
